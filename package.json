@@ -1,0 +1,31 @@
+{
+  "name": "cdk-ecs-sample",
+  "version": "0.1.0",
+  "bin": {
+    "cdk-ecs-sample": "bin/cdk-ecs-sample.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@aws-cdk/assert": "^1.12.0",
+    "@aws-cdk/aws-cloudfront": "^1.13.1",
+    "@aws-cdk/aws-ec2": "^1.13.1",
+    "@aws-cdk/aws-rds": "^1.13.1",
+    "@aws-cdk/aws-s3": "^1.13.1",
+    "@types/jest": "^24.0.18",
+    "@types/node": "^12.11.1",
+    "aws-cdk": "^1.12.0",
+    "jest": "^24.9.0",
+    "ts-jest": "^24.0.2",
+    "ts-node": "^8.1.0",
+    "typescript": "~3.6.2"
+  },
+  "dependencies": {
+    "@aws-cdk/core": "^1.12.0",
+    "source-map-support": "^0.5.9"
+  }
+}

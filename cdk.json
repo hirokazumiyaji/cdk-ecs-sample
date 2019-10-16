@@ -1,0 +1,23 @@
+{
+  "app": "npx ts-node bin/app.ts",
+  "context": {
+    "service": "ecs-example",
+    "production": {
+      "network": {
+        "vpcCidr": "192.168.0.0/16",
+        "maxAzs": 2,
+        "ingressSubnetCidrMask": 24,
+        "backendSubnetCidrMask": 24,
+        "rdsSubnetCidrMask": 28
+      },
+      "frontend": {
+        "bucketName": ""
+      },
+      "rds": {
+        "instanceType": "db.t3.small",
+        "instances": 1,
+        "defaultDatabaseName": "ecs-example"
+      }
+    }
+  }
+}
