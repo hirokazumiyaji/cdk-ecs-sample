@@ -14,16 +14,10 @@ const environment: string = app.node.tryGetContext('environment')
 const parameters: Context = {
   service: service,
   environment: environment,
-  ...app.node.tryGetContext(environment),
-  ...{
-    rds: {
-      masterUser: {
-        username: process.env.RDS_MASTER_USERNAME,
-        password: process.env.RDS_MASTER_PASSWORD
-      }
-    }
-  }
+  ...app.node.tryGetContext(environment)
 }
+parameters.rds.masterUser.username = process.env.RDS_MASTER_USERNAME!!
+parameters.rds.masterUser.password = process.env.RDS_MASTER_PASSWORD!!
 
 const networkStack = new NetworkStack(app, 'NetworkStack', parameters)
 const rdsStack = new RDSStack(

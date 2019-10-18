@@ -11,10 +11,14 @@
         "rdsSubnetCidrMask": 28
       },
       "frontend": {
-        "bucketName": ""
+        "bucketName": "hirokazum.com"
       },
       "rds": {
-        "instanceType": "db.t3.small",
+        "masterUser": {
+          "username": "",
+          "password": ""
+        },
+        "instanceType": "t3.micro",
         "instances": 1,
         "defaultDatabaseName": "ecs-example"
       }

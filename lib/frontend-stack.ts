@@ -1,6 +1,6 @@
 import { Construct, Stack, StackProps, Tag } from '@aws-cdk/core'
-import { Bucket } from '@aws-cdk/aws-s3'
-import { CloudFrontWebDistribution } from '@aws-cdk/aws-cloudfront'
+import { Bucket, BucketAccessControl } from '@aws-cdk/aws-s3'
+import { CloudFrontWebDistribution, OriginProtocolPolicy } from '@aws-cdk/aws-cloudfront'
 import { Context } from '../types/context'
 
 interface FrontendStackProps extends StackProps, Context {
@@ -16,6 +16,7 @@ export class FrontendStack extends Stack {
       {
           bucketName: props.frontend.bucketName,
           websiteIndexDocument: 'index.html',
+          accessControl: BucketAccessControl.PUBLIC_READ,
           publicReadAccess: true
       }
     )
@@ -29,8 +30,9 @@ export class FrontendStack extends Stack {
       {
         originConfigs: [
             {
-              s3OriginSource: {
-                s3BucketSource: bucket
+              customOriginSource: {
+                domainName: bucket.bucketWebsiteDomainName,
+                originProtocolPolicy: OriginProtocolPolicy.HTTP_ONLY
               },
               behaviors: [
                 { isDefaultBehavior: true }
