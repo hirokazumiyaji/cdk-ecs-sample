@@ -30,4 +30,14 @@ const rdsStack = new RDSStack(
   }
 )
 const frontendStack = new FrontendStack(app, 'FrontendStack', parameters)
-const backendStack = new BackendStack(app, 'BackendStack', parameters)
+const backendStack = new BackendStack(
+  app,
+  'BackendStack',
+  {
+    vpc: networkStack.vpc,
+    ingressSecurityGroup: networkStack.ingressSecurityGroup,
+    backendSecurityGroup: networkStack.backendSecurityGroup,
+    databaseCluster: rdsStack.databaseCluster,
+    ...parameters
+  }
+)

@@ -7,15 +7,36 @@ export interface Context {
     ingressSubnetCidrMask: number
     backendSubnetCidrMask: number
     rdsSubnetCidrMask: number
-  },
+  }
   frontend: {
     bucketName: string
-  },
+  }
+  backend: {
+    repositoryName: string
+    cluster: {
+      serviceName: string
+      autoScalingGroup: {
+        desiredCapacity: number
+        maxCapacity: number
+      }
+      ec2Service: {
+        desiredCount: number
+      }
+    }
+    container: {
+      cpu: number
+      memoryLimitMiB: number
+      containerPorts: number[]
+    }
+    instance: {
+      instanceType: string
+    }
+  }
   rds: {
     masterUser: {
       username: string
       password: string
-    },
+    }
     instanceType: string
     instances: number
     defaultDatabaseName: string

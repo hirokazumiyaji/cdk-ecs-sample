@@ -13,14 +13,35 @@
       "frontend": {
         "bucketName": "hirokazum.com"
       },
+      "backend": {
+        "repositoryName": "ecs-sample",
+        "cluster": {
+          "serviceName": "app",
+          "autoScalingGroup": {
+            "desiredCapacity": 1,
+            "maxCapacity": 1
+          },
+          "ec2Service": {
+            "desiredCount": 1
+          }
+        },
+        "instance": {
+          "instanceType": "t3.small"
+        },
+        "container": {
+          "cpu": 1024,
+          "memoryLimitMiB": 512,
+          "containerPorts": [3000]
+        }
+      },
       "rds": {
         "masterUser": {
           "username": "",
           "password": ""
         },
-        "instanceType": "t3.micro",
+        "instanceType": "t2.small",
         "instances": 1,
-        "defaultDatabaseName": "ecs-example"
+        "defaultDatabaseName": "example"
       }
     }
   }

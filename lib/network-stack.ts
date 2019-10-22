@@ -1,6 +1,6 @@
 import { Construct, Stack, StackProps, Tag, CfnResource, ConstructNode, IConstruct } from '@aws-cdk/core'
-import { Context } from '../types/context'
 import { CfnSubnet, Peer, Port, SecurityGroup, SubnetType, Vpc, SubnetNetworkAclAssociation } from '@aws-cdk/aws-ec2'
+import { Context } from '../types/context'
 
 interface NetworkStackProps extends StackProps, Context {
 }
