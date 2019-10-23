@@ -24,7 +24,6 @@ export interface Context {
       }
     }
     container: {
-      cpu: number
       memoryLimitMiB: number
       containerPorts: number[]
     }

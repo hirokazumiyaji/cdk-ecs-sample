@@ -7,7 +7,7 @@ import {
   EcsOptimizedImage,
   NetworkMode,
   PortMapping,
-  TaskDefinition
+  Ec2TaskDefinition
 } from '@aws-cdk/aws-ecs'
 import { AutoScalingGroup } from '@aws-cdk/aws-autoscaling'
 import {
@@ -19,7 +19,7 @@ import {
   SubnetType,
   UserData
 } from '@aws-cdk/aws-ec2'
-import { Repository } from '@aws-cdk/aws-ecr'
+import { IRepository, Repository } from '@aws-cdk/aws-ecr'
 import {
   AddApplicationTargetsProps,
   ApplicationLoadBalancer,
@@ -38,21 +38,6 @@ interface BackendStackProps extends StackProps, Context {
 export class BackendStack extends Stack {
   constructor(scope: Construct, id: string, props: BackendStackProps) {
     super(scope, id, props)
-
-    const applicationLoadBalancer = new ApplicationLoadBalancer(
-      this,
-      'ApplicationLoadBalancer',
-      {
-        vpc: props.vpc,
-        vpcSubnets: { subnetGroupName: 'SubnetIngress' },
-        securityGroup: props.ingressSecurityGroup,
-        loadBalancerName: `${props.service}-${props.environment}`,
-        internetFacing: true
-      }
-    )
-    applicationLoadBalancer.node.applyAspect(new Tag('Name', `${props.service}-${props.environment}`))
-    applicationLoadBalancer.node.applyAspect(new Tag('Service', props.service))
-    applicationLoadBalancer.node.applyAspect(new Tag('Environment', props.environment))
 
     const userData = UserData.forLinux()
     userData.addCommands(
@@ -88,27 +73,23 @@ export class BackendStack extends Stack {
     cluster.node.applyAspect(new Tag('Service', props.service))
     cluster.node.applyAspect(new Tag('Environment', props.environment))
 
-    const repository = new Repository(this, 'Repository', {
-      repositoryName: props.backend.repositoryName
-    })
+    const repository = Repository.fromRepositoryName(this, 'Repository', props.backend.repositoryName)
     repository.node.applyAspect(new Tag('Name', `${props.service}-${props.environment}`))
     repository.node.applyAspect(new Tag('Service', props.service))
     repository.node.applyAspect(new Tag('Environment', props.environment))
 
     const image = ContainerImage.fromEcrRepository(repository)
-    const taskDefinition = new TaskDefinition(this, 'TaskDefinition', {
-      networkMode: NetworkMode.BRIDGE,
-      compatibility: Compatibility.EC2
+    const taskDefinition = new Ec2TaskDefinition(this, 'EC2TaskDefinition', {
+      networkMode: NetworkMode.BRIDGE
     })
 
     const container = taskDefinition.addContainer('AppContainer', {
       image: image,
-      cpu: props.backend.container.cpu,
       memoryLimitMiB: props.backend.container.memoryLimitMiB,
       environment: {
         TZ: 'Asia/Tokyo',
         ENVIRONMENT: props.environment,
-        DATABASE_URL: `${props.rds.masterUser.username}:${props.rds.masterUser.password}@${props.databaseCluster.clusterEndpoint.hostname}:${props.databaseCluster.clusterEndpoint.port}/${props.rds.defaultDatabaseName}?loc=Local&collation=utf8mb4_unicode_ci`
+        DATABASE_URL: `${props.rds.masterUser.username}:${props.rds.masterUser.password}@tcp(${props.databaseCluster.clusterEndpoint.hostname}:3306)/${props.rds.defaultDatabaseName}?loc=Local&collation=utf8mb4_unicode_ci`
       }
     })
     const appPortMappings: PortMapping[] = props.backend.container.containerPorts.map(it => {
@@ -123,21 +104,38 @@ export class BackendStack extends Stack {
       serviceName: props.backend.cluster.serviceName
     })
 
-    const addApplicationTargetsProps: AddApplicationTargetsProps = {
-      port: 80,
-      protocol: ApplicationProtocol.HTTP,
-      healthCheck: { path: '/health' }
-    }
+    const applicationLoadBalancer = new ApplicationLoadBalancer(
+      this,
+      'ApplicationLoadBalancer',
+      {
+        vpc: props.vpc,
+        vpcSubnets: { subnetGroupName: 'SubnetIngress' },
+        securityGroup: props.ingressSecurityGroup,
+        loadBalancerName: `${props.service}-${props.environment}`,
+        internetFacing: true
+      }
+    )
+    applicationLoadBalancer.node.applyAspect(new Tag('Name', `${props.service}-${props.environment}`))
+    applicationLoadBalancer.node.applyAspect(new Tag('Service', props.service))
+    applicationLoadBalancer.node.applyAspect(new Tag('Environment', props.environment))
 
     const httpListener = applicationLoadBalancer.addListener('PublicListenerHttp', {
       protocol: ApplicationProtocol.HTTP,
       port: 80,
       open: true
     })
-    const httpListenerTargetGroup = httpListener.addTargets(
+    httpListener.addTargets(
       'PublicListenerHttpTargets',
-      addApplicationTargetsProps
+      {
+        port: 80,
+        protocol: ApplicationProtocol.HTTP,
+        targets: [ec2Service],
+        healthCheck: {
+          interval: Duration.seconds(60),
+          path: '/health',
+          timeout: Duration.seconds(5)
+        }
+      }
     )
-    httpListenerTargetGroup.addTarget(ec2Service)
   }
 }

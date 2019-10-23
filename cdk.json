@@ -29,7 +29,6 @@
           "instanceType": "t3.small"
         },
         "container": {
-          "cpu": 1024,
           "memoryLimitMiB": 512,
           "containerPorts": [3000]
         }
