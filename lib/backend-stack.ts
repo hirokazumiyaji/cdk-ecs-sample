@@ -53,7 +53,7 @@ export class BackendStack extends Stack {
         vpc: props.vpc,
         vpcSubnets: { subnetGroupName: 'SubnetBackend' },
         instanceType: new InstanceType(props.backend.instance.instanceType),
-        machineImage: EcsOptimizedImage.amazonLinux(),
+        machineImage: EcsOptimizedImage.amazonLinux2(),
         desiredCapacity: props.backend.cluster.autoScalingGroup.desiredCapacity,
         maxCapacity: props.backend.cluster.autoScalingGroup.maxCapacity,
         userData: userData
